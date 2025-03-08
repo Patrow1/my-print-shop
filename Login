@@ -1,0 +1,57 @@
+#include <iostream>
+#include <fstream>
+#include <unordered_map>
+#include <openssl/sha.h>
+
+using namespace std;
+
+class UserAuth {
+private:
+    unordered_map<string, string> users;
+    string currentUser;
+
+    string sha256(const string& password) {
+        unsigned char hash[SHA256_DIGEST_LENGTH];
+        SHA256((unsigned char*)password.c_str(), password.size(), hash);
+        string hashedPassword;
+        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+            char buf[3];
+            sprintf(buf, "%02x", hash[i]);
+            hashedPassword += buf;
+        }
+        return hashedPassword;
+    }
+
+    void loadUsers() {
+        ifstream file("users.txt");
+        string email, password;
+        while (file >> email >> password) {
+            users[email] = password;
+        }
+        file.close();
+    }
+
+    void saveUser(const string& email, const string& password) {
+        ofstream file("users.txt", ios::app);
+        file << email << " " << password << endl;
+        file.close();
+    }
+
+public:
+    UserAuth() {
+        loadUsers();
+    }
+
+    bool registerUser(const string& email, const string& password) {
+        if (users.find(email) != users.end()) {
+            cout << "Użytkownik już istnieje!\n";
+            return false;
+        }
+        string hashedPassword = sha256(password);
+        users[email] = hashedPassword;
+        saveUser(email, hashedPassword);
+        cout << "Rejestracja zakończona sukcesem!\n";
+        return true;
+    }
+
+    
