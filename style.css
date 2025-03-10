@@ -21,3 +21,39 @@ header {
     margin-top: 20px;
     background: #f9f9f9;
 }
+#include <QApplication>
+#include <QPushButton>
+#include <QWidget>
+
+class MainWindow : public QWidget {
+public:
+    MainWindow() {
+        setWindowTitle("Sklep");
+        resize(800, 600); // Rozmiar okna
+
+        button = new QPushButton("Sklep", this);
+        button->resize(200, 50);
+
+        updateButtonPosition();
+    }
+
+protected:
+    void resizeEvent(QResizeEvent *event) override {
+        QWidget::resizeEvent(event);
+        updateButtonPosition();
+    }
+
+private:
+    QPushButton *button;
+
+    void updateButtonPosition() {
+        button->move(width() - button->width(), 0);
+    }
+};
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+    MainWindow window;
+    window.show();
+    return app.exec();
+}
